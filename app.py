@@ -17,33 +17,60 @@ def homepage():
 @app.route('/froyo')
 def choose_froyo():
     """Shows a form to collect the user's Fro-Yo order."""
-    pass
+    return render_template('froyo_form.html')
+
+
 
 @app.route('/froyo_results')
 def show_froyo_results():
     """Shows the user what they ordered from the previous page."""
-    pass
+    context = {
+        'users_froyo_flavor':  request.args.get('flavor'),
+        'users_toppings' : request.args.get('toppings')   
+    }
+    return render_template('froyo_results.html', **context)
 
+ 
 @app.route('/favorites')
 def favorites():
     """Shows the user a form to choose their favorite color, animal, and city."""
-    pass
+    return """
+    <form action="/favorites_results" method="GET">
+        Please enter your favorite color: <br/>
+        <input type="text" name="color"><br/>
+        Here, please enter your favorite animal: <br/>
+        <input type="text" name="animal"><br/>
+        And please enter your favorite city: <br/>
+        <input type="text" name="city"><br/>
+        <input type="submit" value="Submit!">
+    </form>
+    """
 
 @app.route('/favorites_results')
 def favorites_results():
     """Shows the user a nice message using their form results."""
-    pass
+    input_color = request.args.get('color')
+    input_animal = request.args.get('animal')
+    input_city = request.args.get('city')
+    return f"Wow, I didn't know {input_color} {input_animal}'s lived in {input_city}!"
 
 @app.route('/secret_message')
 def secret_message():
     """Shows the user a form to collect a secret message. Sends the result via
     the POST method to keep it a secret!"""
-    pass
+    return """
+    <form action="/message_results" method="POST">
+        What is you secret message? <br/>
+        <input type="text" name="message"><br/>
+        <input type="submit" value="Submit!">
+    </form>
+    """
 
 @app.route('/message_results', methods=['POST'])
 def message_results():
     """Shows the user their message, with the letters in sorted order."""
-    pass
+    input_message = sort_letters(request.form.get('message'))
+    return f"Here's your secret message! <br/> {input_message}"
 
 @app.route('/calculator')
 def calculator():
@@ -66,7 +93,13 @@ def calculator():
 @app.route('/calculator_results')
 def calculator_results():
     """Shows the user the result of their calculation."""
-    pass
+    context = {
+        'num1' : int(request.args.get('operand1')),
+        'operation' : request.args.get('operation'),
+        'num2' : int(request.args.get('operand2'))
+    }
+
+    return render_template('calculator_results.html', **context)
 
 
 HOROSCOPE_PERSONALITIES = {
@@ -93,20 +126,23 @@ def horoscope_form():
 def horoscope_results():
     """Shows the user the result for their chosen horoscope."""
 
+    user_name = request.args.get('users_name')
+
     # TODO: Get the sign the user entered in the form, based on their birthday
-    horoscope_sign = ''
+    horoscope_sign = request.args.get('horoscope_sign')
 
     # TODO: Look up the user's personality in the HOROSCOPE_PERSONALITIES
     # dictionary based on what the user entered
-    users_personality = ''
+    users_personality = HOROSCOPE_PERSONALITIES[horoscope_sign]
 
     # TODO: Generate a random number from 1 to 99
-    lucky_number = 0
+    lucky_number = random.randint(1, 99)
 
     context = {
         'horoscope_sign': horoscope_sign,
         'personality': users_personality, 
-        'lucky_number': lucky_number
+        'lucky_number': lucky_number,
+        'user_name': user_name
     }
 
     return render_template('horoscope_results.html', **context)
